@@ -26,4 +26,15 @@ internal class GremlinApi
         
         await gremlinClient.SubmitAsync<dynamic>(vertex ?? string.Empty);
     }
+
+    public async Task<Vertex[]> GetPersonByNameAsync(string name)
+    {
+        using var gremlinClient = new GremlinClient(_server);
+
+        var g = AnonymousTraversalSource.Traversal().WithRemote(new DriverRemoteConnection(gremlinClient));
+
+        var query = await g.V().HasLabel("person").Has("name", name).Promise(e => e.ToList());
+
+        return query.Where(e => e is not null).ToArray()!;
+    }
 }
